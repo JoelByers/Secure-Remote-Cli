@@ -1,4 +1,4 @@
-#include "DiffieHellman.h"
+#include "DiffieHellmanRSA.h"
 #include <cstdlib>
 #include <time.h>
 #include "fastmodexpon.h"
@@ -8,11 +8,11 @@
 
 using namespace std;
 
-DiffieHellman::DiffieHellman(int socket){
+DiffieHellmanRSA::DiffieHellmanRSA(int socket){
     this->socket = socket;
 }
 
-void DiffieHellman::serverGetPrivateKey(){
+void DiffieHellmanRSA::serverGetPrivateKey(){
 
     // RSA ///////////////////////////////////////////////////////////////////////////////////////
     RSA rsa;
@@ -40,7 +40,7 @@ void DiffieHellman::serverGetPrivateKey(){
     // Raise base to secret number
     int serverResult = FastModExpon(base, serverSecret, mod);
     // Send to client
-    DiffieHellmanServerData data;
+    DiffieHellmanRSAServerData data;
     // data.base = base;
     // data.mod = mod;
     // data.serverResult = serverResult;
@@ -61,7 +61,7 @@ void DiffieHellman::serverGetPrivateKey(){
     this->privateKey = FastModExpon(clientResult, serverSecret, mod);
 }
 
-void DiffieHellman::clientGetPrivateKey(){
+void DiffieHellmanRSA::clientGetPrivateKey(){
 
     // RSA //////////////////////////////////////////////////////////////////////////
     int serverRSAKey;
@@ -79,7 +79,7 @@ void DiffieHellman::clientGetPrivateKey(){
 	}
 
     // Diffie-Hellman ////////////////////////////////////////////////////////////////
-    DiffieHellmanServerData serverData;
+    DiffieHellmanRSAServerData serverData;
 
     recv(this->socket, &serverData, sizeof(serverData), 0);
     
@@ -106,6 +106,6 @@ void DiffieHellman::clientGetPrivateKey(){
     this->privateKey = FastModExpon(serverData.serverResult, clientSecret, serverData.mod);
 }
 
-int DiffieHellman::getPrivateKey(){
+int DiffieHellmanRSA::getPrivateKey(){
     return this->privateKey;
 }

@@ -8,7 +8,7 @@ struct DiffieHellmanServerData{
     int serverResult;
 };
 
-class DiffieHellman{
+class DiffieHellmanRSA{
     private:
         int socket;
         int privateKey;
