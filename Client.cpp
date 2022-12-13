@@ -6,14 +6,9 @@
 #include <unistd.h>
 #include "SDES.h"
 #include "RSA.h"
+#include "DiffieHellmanRSA.h"
 
 using namespace std;
-
-struct DiffieHellmanServerData{
-    int base;
-    int mod;
-    int serverResult;
-};
 
 int main(){
     // create socket
@@ -35,64 +30,13 @@ int main(){
 	}
 
     cout << "Connected to Server...\n";
-    // RSA //////////////////////////////////////////////////////////////////////////
-    int serverRSAKey;
-    recv(socket_description, &serverRSAKey, sizeof(serverRSAKey), 0);
 
-    cout << "Received RSA Keys...\n";
-    cout << serverRSAKey << endl;
-    RSA rsa;
-    int ClientRsaE = rsa.getE();
-
-    if(send(socket_description , &ClientRsaE, sizeof(ClientRsaE) , 0) < 0)
-	{
-		cout << "Unable to send client data to server" << endl;
-		return 1;
-	}
-
-    // DIFFIE-HELLMAN ////////////////////////////////////////////////////////////////
-    DiffieHellmanServerData serverData;
-
-    // Wait for Server to send public base, mod, and base raised to secret
-    recv(socket_description, &serverData, sizeof(serverData), 0);
-    cout << "Received data from Server...\n";
-
-    // Decrypt with RSA
-    serverData.base = rsa.decrypt(serverData.base);
-    serverData.mod = rsa.decrypt(serverData.mod);
-    serverData.serverResult = rsa.decrypt(serverData.serverResult);
-
-    // Pick Client secret number
-    srand(time(0) * 2);
-    int clientSecret = rand() % 50;
-
-    // Raise Client secret number to base and mod
-    int clientResult = FastModExpon(serverData.base, clientSecret, serverData.mod);
-
-    cout << "Received data from Server...\n";
-    cout << "-------------------------------------\n";
-    cout << "Base          : " << serverData.base << "\n";
-    cout << "Mod           : " << serverData.mod << "\n";
-    cout << "Client Secret : " << clientSecret << "\n";
-    cout << "Server Result : " << serverData.serverResult << "\n";
-    cout << "Client Result : " << clientResult << "\n";
-    cout << "-------------------------------------\n";
-
-    // Send Client result to Server
-    cout << "Sending result to Server...\n";
-    clientResult = rsa.encrypt(clientResult, serverRSAKey);
-    if(send(socket_description , &clientResult, sizeof(clientResult) , 0) < 0)
-	{
-		cout << "Unable to send client data to server" << endl;
-		return 1;
-	}
-
-    // Raise Server result to Client secret number
-    int privateKey = FastModExpon(serverData.serverResult, clientSecret, serverData.mod);
+    DiffieHellmanRSA dhrsa(socket_description);
+    dhrsa.clientGetPrivateKey();
     bool key[10] = {0,0,0,0,0,0,0,0,0,0};
-    asciiToBinary((char)privateKey, key);
+    asciiToBinary((char)dhrsa.getPrivateKey(), key);
 
-    cout << "Private Key: " << privateKey << endl;
+    cout << "Private Key: " << dhrsa.getPrivateKey() << endl;
 
     bool encryptedBytes[100][8] = {{}};
     recv(socket_description, &encryptedBytes, sizeof(encryptedBytes), 0);

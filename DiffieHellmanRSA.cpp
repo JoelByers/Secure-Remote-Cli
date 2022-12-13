@@ -40,7 +40,7 @@ void DiffieHellmanRSA::serverGetPrivateKey(){
     // Raise base to secret number
     int serverResult = FastModExpon(base, serverSecret, mod);
     // Send to client
-    DiffieHellmanRSAServerData data;
+    DiffieHellmanServerData data;
     // data.base = base;
     // data.mod = mod;
     // data.serverResult = serverResult;
@@ -79,7 +79,7 @@ void DiffieHellmanRSA::clientGetPrivateKey(){
 	}
 
     // Diffie-Hellman ////////////////////////////////////////////////////////////////
-    DiffieHellmanRSAServerData serverData;
+    DiffieHellmanServerData serverData;
 
     recv(this->socket, &serverData, sizeof(serverData), 0);
     
@@ -93,7 +93,8 @@ void DiffieHellmanRSA::clientGetPrivateKey(){
     int clientSecret = rand() % 50;
 
     // Raise Client secret number to base and mod
-    int clientResult = rsa.encrypt((serverData.base, clientSecret, serverData.mod), serverRSAKey);
+    int clientResult = FastModExpon(serverData.base, clientSecret, serverData.mod);
+    clientResult = rsa.encrypt(clientResult, serverRSAKey);
 
     // Send Client result to server
     if(send(this->socket , &clientResult, sizeof(clientResult) , 0) < 0)

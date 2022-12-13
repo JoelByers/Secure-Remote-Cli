@@ -13,7 +13,7 @@ class DiffieHellmanRSA{
         int socket;
         int privateKey;
     public:
-        DiffieHellman(int socket);
+        DiffieHellmanRSA(int socket);
         void serverGetPrivateKey();
         void clientGetPrivateKey();
         int getPrivateKey();

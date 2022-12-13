@@ -1,5 +1,5 @@
 echo Building Server...
-g++ Server.cpp DiffieHellman.cpp fastmodexpon.cpp RSA.cpp SDES.cpp -o server.out
+g++ Server.cpp DiffieHellmanRSA.cpp fastmodexpon.cpp RSA.cpp SDES.cpp -o server.out
 echo Building Client...
-g++ Client.cpp DiffieHellman.cpp fastmodexpon.cpp RSA.cpp SDES.cpp -o client.out
+g++ Client.cpp DiffieHellmanRSA.cpp fastmodexpon.cpp RSA.cpp SDES.cpp -o client.out
 echo Done
