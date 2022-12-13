@@ -94,6 +94,16 @@ void stringArrayToCharArray(string* input, char** &output, int count){
     }
 }
 
+bool Cli::commandIsAllowed(string command){
+    for(int i = 0; i < 6; i++){
+        if(commandWhitelist[i].compare(command) == 0){
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool Cli::call(string input){
     string pipeSplit[2];
     bool hasPipe = seperatePipe(input, pipeSplit);
@@ -106,6 +116,12 @@ bool Cli::call(string input){
     string* args;
     int numArgs = 0;    
     splitArgs(input, command, args, numArgs);
+    
+    if(commandIsAllowed(command) == false){
+        cout << "You don't have permission to use command \""<< command << "\"" << endl;
+        return false;
+    }
+
     char** argsAry;
     stringArrayToCharArray(args, argsAry, numArgs);
     
@@ -120,7 +136,6 @@ bool Cli::call(string input){
                 cout << "Unable to duplicate stream" << endl;
                 return false;
             }
-            //fopen_s( &DataFile, "data", "w" );
             FILE *DataFile = fopen(pipeSplit[1].c_str(), "w");
             dup2(fileno(DataFile), 1);
 
