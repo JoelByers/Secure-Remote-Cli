@@ -1,0 +1,16 @@
+version=1
+serialNumber=100
+signatureAlgorithmIdentity=cbc
+signatureAlgorithmParameters=none
+issuerName=CA
+validNotBefore=1
+validNotAfter=4
+subjectName=Server
+publicKeyAlgorithm=rsa
+publicKeyParameters=none
+publicKey=17
+issuerUniqueIdentifier=asdf123
+extensions=none
+signatureAlgorithm=cbc
+signatureParameters=none
+trust=3

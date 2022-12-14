@@ -10,10 +10,12 @@
 #include "RSA.h"
 #include <unistd.h>
 #include "DiffieHellmanRSA.h"
+#include "Cert487.h"
+#include "CertGroup.h"
 
 using namespace std;
 
-int main(){
+int main(int argc, char** argv){
 
     // create socket
     int socket_description = socket(AF_INET, SOCK_STREAM, 0);
@@ -46,18 +48,57 @@ int main(){
     }
 
     cout << "Connected" << endl;
+    // CRL /////////////////////////////////////////////////////////////////////////////////
 
+    CRL crl("crl.txt");
+    cout << "\nCRL:" << endl;
+    crl.print();
+    cout << "=============================================" << endl;
+  
+    // Cert //////////////////////////////////////////////////////////////////////////////
+
+    int numCerts = argc - 1;
+
+    cout << "Certs:" << endl;
+
+    CertGroup certGroup;
+    Cert487 serverCert(Cert487("Server.txt"));
+    certGroup.addCert(serverCert);
+    serverCert.printLess();
+
+    for(int i = 0; i < numCerts; i++){
+        Cert487 cert(argv[i + 1]);
+        cert.printLess();
+        cout << "----------------------------------------------------\n";
+        certGroup.addCert(cert);
+    }    
+
+    cout << "----------------------------------------------------\n";
+
+    // Send server cert to client
+    CertData serverCertData = serverCert.getData();
+    if(send(new_socket , &serverCertData, sizeof(serverCertData), 0) < 0)
+    {
+        cout << "Unable to send server data to client";
+        return 1;
+    }
+
+    // Get client cert
+    CertData clientCertData;
+    recv(new_socket, &clientCertData, sizeof(clientCertData), 0);
+    Cert487 clientCert(clientCertData);
+    clientCert.printLess();
+    certGroup.addCert(clientCert);
+
+    // DH-RSA ////////////////////////////////////////////////////////////////////////////
     bool key[10] = {0,0,0,0,0,0,0,0,0,0};
-
     DiffieHellmanRSA dhrsa(new_socket);
     dhrsa.serverGetPrivateKey();
     asciiToBinary((char)dhrsa.getPrivateKey(), key);
 
     cout << "Private Key: " << dhrsa.getPrivateKey() << endl;
 
-    // cout << "Enter a message to send securely (< 100 chars): ";
-    // string message;
-    // getline(cin,message);
+    // CLI ////////////////////////////////////////////////////////////////////////////////
 
     string command = "";
     
@@ -91,7 +132,7 @@ int main(){
     }
     while(command != "quit");
 
-    cout << "Closing connection...";
+    cout << "Closing connection..." << endl;
 
     close(socket_description);
 

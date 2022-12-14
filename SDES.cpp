@@ -14,7 +14,6 @@ void printBitArray(bool* ary, int arySize){
     cout << endl;
 }
 
-using namespace std;
 void p10(bool key[10]){
     int newpos[10] = {3,5,2,7,4,10,1,9,8,6};
     bool temp[10];

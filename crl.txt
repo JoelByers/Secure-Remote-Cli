@@ -1,0 +1,7 @@
+signatureAlgorithmIdentity=cbc
+signatureAlgorithmParameters=none
+issuerName=CertificateAuthority
+thisDate=2
+nextDate=4
+revokedSerialNumber=123
+revokedDate=2

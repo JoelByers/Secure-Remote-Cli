@@ -46,6 +46,7 @@ void Cli::splitArgs(string input, string &command, string* &args, int &numArgs){
     int countIndex = index;
     while(countIndex < input.length()){
         // count arguments
+
         while(countIndex < input.length() && input.at(countIndex) == ' '){
             countIndex++;
         }
@@ -54,9 +55,10 @@ void Cli::splitArgs(string input, string &command, string* &args, int &numArgs){
             countIndex++;
         }  
         numArgs++;
+
     }
 
-    args = (string*)malloc(sizeof(string) * (numArgs + 1));
+    args = new string[numArgs + 1];
     args[0] = command;
 
     int argIndex = 1;
@@ -107,7 +109,7 @@ bool Cli::commandIsAllowed(string command){
 bool Cli::call(string input){
     string pipeSplit[2];
     bool hasPipe = seperatePipe(input, pipeSplit);
-
+    cout << "AAAAAA" << endl;
     string command;
     if(hasPipe == true){
         input = pipeSplit[0];
@@ -116,7 +118,8 @@ bool Cli::call(string input){
     string* args;
     int numArgs = 0;    
     splitArgs(input, command, args, numArgs);
-    
+    cout << "AAAAAA" << endl;
+
     if(commandIsAllowed(command) == false){
         cout << "You don't have permission to use command \""<< command << "\"" << endl;
         return false;
