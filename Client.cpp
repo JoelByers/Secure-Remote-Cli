@@ -101,53 +101,55 @@ int main(int argc, char** argv){
     cout << "====================================================" << endl;
 
     // CLI ////////////////////////////////////////////////////////////////////////////////
-
-    // do{
-    //     cerr << endl << "@Host $ ";
-
-    //     int received = 0;
-    //     bool encryptedBytes[100][8] = {{}};
-    //     recv(socket_description, &encryptedBytes, sizeof(encryptedBytes), 0);
-
-    //      // Decrypt
-    //     for(int i = 0; i < 100; i++){
-    //         decrypt(encryptedBytes[i], key);
-    //         message[i] = binaryToChar(encryptedBytes[i]);
-    //     }
-    //     cout << endl;
-    //     string command(message);
-    //     cli.call(command);   
-    // }
-    // while(strcmp(message, "quit") != 0);
-
-    bool encryptedBytes[100][8] = {{}};
-    char message[100] = {};
     Cli cli;
+    char message[100] = {};
 
-    while(recv(socket_description, &encryptedBytes, sizeof(encryptedBytes), 0) > 0){
+    do{
         cerr << endl << "@Host $ ";
 
+        bool encryptedBytes[100][8] = {{}};
         int received = 0;
+        recv(socket_description, &encryptedBytes, sizeof(encryptedBytes), 0);
 
          // Decrypt
         for(int i = 0; i < 100; i++){
             decrypt(encryptedBytes[i], key);
             message[i] = binaryToChar(encryptedBytes[i]);
         }
-
         cout << endl;
-
-        if(strcmp(message, "quit") == 0){
-            break;
-        }
-
-        //string command(message);
-        cli.call(message);   
-
-		memset(encryptedBytes, 0 , 800);
-		memset(message ,'\0' , 100);
-
+        string command(message);
+        cli.call(command);   
     }
+    while(strcmp(message, "quit") != 0);
+
+    // bool encryptedBytes[100][8] = {{}};
+    // char message[100] = {};
+    // Cli cli;
+
+    // while(recv(socket_description, &encryptedBytes, sizeof(encryptedBytes), 0) > 0){
+    //     cerr << endl << "@Host $ ";
+
+    //     int received = 0;
+
+    //      // Decrypt
+    //     for(int i = 0; i < 100; i++){
+    //         decrypt(encryptedBytes[i], key);
+    //         message[i] = binaryToChar(encryptedBytes[i]);
+    //     }
+
+    //     cout << endl;
+
+    //     if(strcmp(message, "quit") == 0){
+    //         break;
+    //     }
+
+    //     //string command(message);
+    //     cli.call(message);   
+
+	// 	memset(encryptedBytes, 0 , 800);
+	// 	memset(message ,'\0' , 100);
+
+    // }
 
     cout << "Closing Connection..." << endl;
 
