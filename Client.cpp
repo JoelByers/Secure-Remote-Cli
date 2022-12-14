@@ -15,6 +15,32 @@
 
 using namespace std;
 
+struct credentials;
+struct credentials{
+    char username[50];
+    char password[50];
+};
+
+char hashFunction(string temp){
+    bool iv[8] = {0,0,0,0,0,0,0,0};
+    string test;
+    for(int i = 0; i < temp.length(); i++){
+        bool bits[8] = {0,0,0,0,0,0,0,0};
+        bool key[10] = {0,0,0,0,0,0,0,0,0,0};
+        asciiToBinary(temp[i], bits);
+        exclusiveOr(bits, iv, 8); //exclusive or before encrypting with iv
+        encrypt(bits, key);
+            
+        for(int j = 0; j < 8; j++){
+            iv[j] = bits[j];
+        }
+        test.push_back(binaryToAscii(iv));
+    }
+    //cout<<temp.back()<<endl;
+    cout<<temp<<":"<<test[test.length()-1]<<endl;
+	return binaryToAscii(iv);
+}
+
 int main(int argc, char** argv){
     // create socket
     int socket_description = socket(AF_INET, SOCK_STREAM, 0);
@@ -98,6 +124,27 @@ int main(int argc, char** argv){
         cout << "Private Key: " << sharedKey << endl;
     }
     cout << "====================================================" << endl;
+    // Secure Login ///////////////////////////////////////////////////////////////////////
+    credentials cred;
+    recv(socket_description, &cred, sizeof(cred),0);
+    string user = "CredUser";
+    char userChar[50]; 
+    strcpy(userChar, user.c_str());
+    cout<<cred.password<<endl;
+    string temp = cred.password;
+    string salt = "SaltSpecificToUser";
+    temp.append(salt);
+	char hashedPass = hashFunction(temp);
+    cout<<"hashed password: "<< hashedPass<<endl;
+    char userHash = 'c';
+    
+    if(cred.username == userChar&&hashedPass == userHash){
+        cout<<"Login Successful!"<<endl;
+    }
+    else{
+        cout<<"Unable to login."<<endl;
+        return 1;
+    }
 
     // CLI ////////////////////////////////////////////////////////////////////////////////
 

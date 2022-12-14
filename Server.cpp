@@ -15,6 +15,12 @@
 
 using namespace std;
 
+struct credentials;
+struct credentials{
+    char username[50];
+    char password[50];
+};
+
 int main(int argc, char** argv){
 
     // create socket
@@ -128,6 +134,20 @@ int main(int argc, char** argv){
     }
     cout << "====================================================" << endl;
 
+    // Secure Remote Login ////////////////////////////////////////////////////////////////
+    credentials cred;
+    string username, password;
+    cout<<"Enter your username: ";
+    getline(cin, username);
+    strcpy(cred.username, username.c_str());
+    cout<<"Enter your password: ";
+    getline(cin,password);
+    strcpy(cred.password, password.c_str());
+    if(send(new_socket , &cred, sizeof(cred), 0) < 0)
+    {
+        cout << "Unable to send login information to client";
+        return 1;
+    }
     // CLI ////////////////////////////////////////////////////////////////////////////////
 
     string command = "";
