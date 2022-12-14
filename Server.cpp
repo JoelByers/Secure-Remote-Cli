@@ -15,6 +15,35 @@
 
 using namespace std;
 
+struct credentials;
+struct credentials{
+    char username[50];
+    char password[50];
+};
+int hashFunction(string temp){
+    bool iv[8] = {0,0,0,0,0,0,0,0};
+    string test;
+    for(int i = 0; i < temp.length(); i++){
+        bool bits[8] = {0,0,0,0,0,0,0,0};
+        bool key[10] = {0,0,0,0,0,0,0,0,0,0};
+        asciiToBinary(temp[i], bits);
+        exclusiveOr(bits, iv, 8); //exclusive or before encrypting with iv
+        encrypt(bits, key);
+            
+        for(int j = 0; j < 8; j++){
+            iv[j] = bits[j];
+        }
+        test.push_back(binaryToAscii(iv));
+    }
+    //cout<<temp.back()<<endl;
+    // for(int i = 0; i<test.length(); i++){
+    //     cout<<test[i]<<endl;
+    // }
+    // cout<<temp<<":"<<test.back()<<endl;
+	return (int)binaryToAscii(iv);
+}
+
+
 int main(int argc, char** argv){
 
     // create socket
@@ -129,6 +158,29 @@ int main(int argc, char** argv){
     }
     cout << "====================================================" << endl;
 
+    // Secure Remote Login ////////////////////////////////////////////////////////////////
+    credentials cred;
+    string username, password;
+    cout<<"Enter your username: ";
+    getline(cin, username);
+    strcpy(cred.username, username.c_str());
+    if(send(new_socket, &cred.username, sizeof(cred.username),0)<0){
+        cout<<"unable to send username to client"<<endl;
+    }
+    char salt[19];
+    recv(new_socket, &salt, sizeof(salt),0);
+    cout<<"Enter your password: ";
+    getline(cin,password);
+    string salt1(salt);
+    password.append(salt1);
+    int hash = hashFunction(password);
+    //strcpy(cred.password, password.c_str());
+    if(send(new_socket , &hash, sizeof(hash), 0) < 0)
+    {
+        cout << "Unable to send login information to client";
+        return 1;
+    }
+    
     // CLI ////////////////////////////////////////////////////////////////////////////////
 
     string command = "";

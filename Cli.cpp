@@ -10,17 +10,18 @@
 
 using namespace std;
 
-bool Cli::seperatePipe(string input, string output[2]){
+bool Cli::seperatePipe(string input, string &out1, string &out2){//out1output[2]){
     int index = 0;
     while(index < input.length()){
         if(input.at(index) == '>'){
-            output[0] = input.substr(0, index);
+            out1 = input.substr(0, index);
 
             index++;
             while(input.at(index) == ' '){
                 index++;
             }
-            output[1] = input.substr(index, input.length() - index);
+            out2 = input.substr(index, input.length() - index);
+
             return true;
         }
         index++;
@@ -56,7 +57,6 @@ void Cli::splitArgs(string input, string &command, string* &args, int &numArgs){
         numArgs++;
     }
 
-    //args = (string*)malloc(sizeof(string) * (numArgs + 1));
     args = new string[numArgs + 1];
     args[0] = command;
     int argIndex = 1;
@@ -107,17 +107,19 @@ bool Cli::commandIsAllowed(string command){
 }
 
 bool Cli::call(string input){
-    string pipeSplit[2];
-    bool hasPipe = seperatePipe(input, pipeSplit);
-
+    //string pipeSplit[2];
+    string pipeOut1;
+    string pipeOut2;
+    bool hasPipe = seperatePipe(input, pipeOut1, pipeOut2);
     string command;
     if(hasPipe == true){
-        input = pipeSplit[0];
+        input = pipeOut1;
     }
 
     string* args;
     int numArgs = 0;    
     splitArgs(input, command, args, numArgs);
+    cout << numArgs << endl;
     
     if(commandIsAllowed(command) == false){
         cout << "You don't have permission to use command \""<< command << "\"" << endl;
@@ -138,7 +140,7 @@ bool Cli::call(string input){
                 cout << "Unable to duplicate stream" << endl;
                 return false;
             }
-            FILE *DataFile = fopen(pipeSplit[1].c_str(), "w");
+            FILE *DataFile = fopen(pipeOut2.c_str(), "w");
             dup2(fileno(DataFile), 1);
 
             if(fork() == 0){

@@ -10,7 +10,7 @@ class Cli{
         string commandWhitelist[6] = {"ls", "ps", "cd", "pwd", "touch", "cat"};
         bool commandIsAllowed(string command);
         void splitArgs(string input, string &command, string* &args, int &numArgs);
-        bool seperatePipe(string input, string output[2]);
+        bool seperatePipe(string input, string &out1, string &out2);
     public:
         bool call(string command);
 };
