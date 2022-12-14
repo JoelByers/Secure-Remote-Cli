@@ -51,12 +51,6 @@ int main(int argc, char** argv){
     certGroup.addCert(clientCert);
     clientCert.printLess();
     cout << "----------------------------------------------------\n";
-    // for(int i = 0; i < numCerts; i++){
-    //     Cert487 cert(argv[i + 1]);
-    //     cert.printLess();
-    //     cout << "----------------------------------------------------\n";
-    //     certGroup.addCert(cert);
-    // }    
 
     // Get server cert
     CertData serverCertData;
@@ -73,12 +67,13 @@ int main(int argc, char** argv){
         return 1;
     }    
 
+    cout << endl;
     // Verify Server Cert
     if(certGroup.validateChain(clientCert.getSerialNumber(),serverCert.getSerialNumber() , crl) == false){
         cout << "Unable to validate Chain" << endl;
         return 1;
     }
-    cout << "=============================================" << endl;
+    cout << "====================================================" << endl;
 
     // DH-RSA /////////////////////////////////////////////////////////////////////////////
 
@@ -87,12 +82,14 @@ int main(int argc, char** argv){
 
     bool key[10] = {0,0,0,0,0,0,0,0,0,0};
     if(useDiffieHellman == true){
+        cout << "Using Signed Diffie-Hellman" << endl;
         DiffieHellmanRSA dhrsa(socket_description);
         dhrsa.clientGetPrivateKey();
         asciiToBinary((char)dhrsa.getPrivateKey(), key);
         cout << "Private Key: " << dhrsa.getPrivateKey() << endl;
     }
     else{
+        cout << "Using cutsom key" << endl;
         RSA rsa;
         int entryptedKey;
         recv(socket_description, &entryptedKey, sizeof(entryptedKey), 0);
@@ -100,15 +97,36 @@ int main(int argc, char** argv){
         asciiToBinary((char)sharedKey, key);
         cout << "Private Key: " << sharedKey << endl;
     }
+    cout << "====================================================" << endl;
 
     // CLI ////////////////////////////////////////////////////////////////////////////////
+
+    // do{
+    //     cerr << endl << "@Host $ ";
+
+    //     int received = 0;
+    //     bool encryptedBytes[100][8] = {{}};
+    //     recv(socket_description, &encryptedBytes, sizeof(encryptedBytes), 0);
+
+    //      // Decrypt
+    //     for(int i = 0; i < 100; i++){
+    //         decrypt(encryptedBytes[i], key);
+    //         message[i] = binaryToChar(encryptedBytes[i]);
+    //     }
+    //     cout << endl;
+    //     string command(message);
+    //     cli.call(command);   
+    // }
+    // while(strcmp(message, "quit") != 0);
+
+    bool encryptedBytes[100][8] = {{}};
     char message[100] = {};
     Cli cli;
 
-    do{
+    while(recv(socket_description, &encryptedBytes, sizeof(encryptedBytes), 0) > 0){
+        cerr << endl << "@Host $ ";
+
         int received = 0;
-        bool encryptedBytes[100][8] = {{}};
-        recv(socket_description, &encryptedBytes, sizeof(encryptedBytes), 0);
 
          // Decrypt
         for(int i = 0; i < 100; i++){
@@ -116,10 +134,19 @@ int main(int argc, char** argv){
             message[i] = binaryToChar(encryptedBytes[i]);
         }
 
+        cout << endl;
+
+        if(strcmp(message, "quit") == 0){
+            break;
+        }
+
         string command(message);
-        cli.call(command);
+        cli.call(command);   
+
+		memset(encryptedBytes, 0 , 800);
+		memset(message ,'\0' , 100);
+
     }
-    while(strcmp(message, "quit") != 0);
 
     cout << "Closing Connection..." << endl;
 

@@ -53,7 +53,7 @@ int main(int argc, char** argv){
     CRL crl("crl.txt");
     cout << "\nCRL:" << endl;
     crl.print();
-    cout << "=============================================" << endl;
+    cout << "====================================================" << endl;
   
     // Cert //////////////////////////////////////////////////////////////////////////////
     cout << "Certs:" << endl;
@@ -63,15 +63,7 @@ int main(int argc, char** argv){
     certGroup.addCert(serverCert);
     serverCert.printLess();
     cout << "----------------------------------------------------\n";
-
-    // for(int i = 0; i < numCerts; i++){
-    //     Cert487 cert(argv[i + 1]);
-    //     cert.printLess();
-    //     cout << "----------------------------------------------------\n";
-    //     certGroup.addCert(cert);
-    // }    
-
-
+    
     // Send server cert to client
     CertData serverCertData = serverCert.getData();
     if(send(new_socket , &serverCertData, sizeof(serverCertData), 0) < 0)
@@ -86,18 +78,20 @@ int main(int argc, char** argv){
     Cert487 clientCert(clientCertData);
     clientCert.printLess();
     certGroup.addCert(clientCert);
+    cout << endl;
 
     // Verify Client Cert
     if(certGroup.validateChain(serverCert.getSerialNumber(),clientCert.getSerialNumber() , crl) == false){
         cout << "Unable to validate Chain" << endl;
         return 1;
     }
-    cout << "=============================================" << endl;
+    cout << "====================================================" << endl;
 
     // DH-RSA ////////////////////////////////////////////////////////////////////////////
     bool key[10] = {0,0,0,0,0,0,0,0,0,0};
     bool useDiffieHellman = true;
     if(argc >= 2){
+        cout << "Using cutsom key" << endl;
         // Tell client to use key given
         useDiffieHellman = false;
         if(send(new_socket , &useDiffieHellman, sizeof(useDiffieHellman), 0) < 0)
@@ -132,6 +126,7 @@ int main(int argc, char** argv){
 
         cout << "Private Key: " << dhrsa.getPrivateKey() << endl;
     }
+    cout << "====================================================" << endl;
 
     // CLI ////////////////////////////////////////////////////////////////////////////////
 
@@ -141,7 +136,8 @@ int main(int argc, char** argv){
         command = "";
         char messageAry[100] = {};
         bool encryptedBytes[100][8] = {{}};
-        cout << "Remote $ ";
+
+        cout << "@Remote $ ";
         getline(cin, command);
         strcpy(messageAry, command.c_str());
 
