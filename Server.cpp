@@ -28,7 +28,8 @@ int main(int argc, char** argv){
     struct sockaddr_in client;
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_port = htons(8431);
+    // server.sin_port = htons(1236);
+    server.sin_port = htons(8235);
 
     // bind to port
     if(bind(socket_description,(struct sockaddr*) &server, sizeof(server)) < 0){

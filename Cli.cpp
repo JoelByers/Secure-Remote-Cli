@@ -42,7 +42,7 @@ void Cli::splitArgs(string input, string &command, string* &args, int &numArgs){
     }
 
     // add command to arg list
-    numArgs++;
+    numArgs = 1;
     int countIndex = index;
     while(countIndex < input.length()){
         // count arguments
@@ -58,6 +58,7 @@ void Cli::splitArgs(string input, string &command, string* &args, int &numArgs){
 
     }
 
+    //args = (string*)malloc(sizeof(string) * (numArgs + 1));
     args = new string[numArgs + 1];
     args[0] = command;
 
@@ -125,7 +126,6 @@ bool Cli::call(string input){
 
     char** argsAry;
     stringArrayToCharArray(args, argsAry, numArgs);
-    
     if(command.compare("cd") == 0){
         chdir(argsAry[1]);
     }
@@ -139,6 +139,7 @@ bool Cli::call(string input){
                 cout << "Unable to duplicate stream" << endl;
                 return false;
             }
+            
             FILE *DataFile = fopen(pipeSplit[1].c_str(), "w");
             dup2(fileno(DataFile), 1);
 

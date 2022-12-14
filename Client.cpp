@@ -24,9 +24,10 @@ int main(int argc, char** argv){
     }
 
     struct sockaddr_in server;
+    // server.sin_addr.s_addr = inet_addr("127.0.0.1");
     server.sin_addr.s_addr = inet_addr("0.0.0.0");
 	server.sin_family = AF_INET;
-    server.sin_port = htons(8431);
+    server.sin_port = htons(8235);
 
 	if (connect(socket_description , (struct sockaddr *)&server , sizeof(server)) < 0)
 	{
@@ -140,8 +141,8 @@ int main(int argc, char** argv){
             break;
         }
 
-        string command(message);
-        cli.call(command);   
+        //string command(message);
+        cli.call(message);   
 
 		memset(encryptedBytes, 0 , 800);
 		memset(message ,'\0' , 100);
