@@ -21,7 +21,7 @@ struct credentials{
     char password[50];
 };
 
-char hashFunction(string temp){
+int hashFunction(string temp){
     bool iv[8] = {0,0,0,0,0,0,0,0};
     string test;
     for(int i = 0; i < temp.length(); i++){
@@ -37,8 +37,11 @@ char hashFunction(string temp){
         test.push_back(binaryToAscii(iv));
     }
     //cout<<temp.back()<<endl;
-    cout<<temp<<":"<<test[test.length()-1]<<endl;
-	return binaryToAscii(iv);
+    for(int i = 0; i<test.length(); i++){
+        cout<<test[i]<<endl;
+    }
+    // cout<<temp<<":"<<test.back()<<endl;
+	return (int)binaryToAscii(iv);
 }
 
 int main(int argc, char** argv){
@@ -125,26 +128,42 @@ int main(int argc, char** argv){
     }
     cout << "====================================================" << endl;
     // Secure Login ///////////////////////////////////////////////////////////////////////
-    credentials cred;
-    recv(socket_description, &cred, sizeof(cred),0);
+    //credentials cred;
+    char username[50];
+    recv(socket_description, &username, sizeof(username),0);
     string user = "CredUser";
-    char userChar[50]; 
-    strcpy(userChar, user.c_str());
-    cout<<cred.password<<endl;
-    string temp = cred.password;
-    string salt = "SaltSpecificToUser";
-    temp.append(salt);
-	char hashedPass = hashFunction(temp);
-    cout<<"hashed password: "<< hashedPass<<endl;
-    char userHash = 'c';
-    
-    if(cred.username == userChar&&hashedPass == userHash){
+    string userIn(username);
+    char salt[19] = "SaltSpecificToUser";
+    if(user == userIn){
+        if(send(socket_description , &salt, sizeof(salt), 0) < 0){
+            cout<<"Unable to send salt to server"<<endl;
+            return 1;
+        }
+    }
+    int hashIn;
+    recv(socket_description, &hashIn, sizeof(hashIn),0);
+    if(hashIn == -28){
         cout<<"Login Successful!"<<endl;
     }
     else{
-        cout<<"Unable to login."<<endl;
-        return 1;
+        cout<<"Unable to login"<<endl;
     }
+    // char userChar[50]; 
+    // strcpy(userChar, user.c_str());
+    // cout<<cred.password<<endl;
+    // string temp = cred.password;
+    // string salt = "SaltSpecificToUser";
+    // temp.append(salt);
+	// int hashedPass = hashFunction(temp);
+    // cout<<"hashed password: "<< hashedPass<<endl;
+    // int userHash = -28;
+    // if(userIn == user&&hashedPass == userHash){
+    //     cout<<"Login Successful!"<<endl;
+    // }
+    // else{
+    //     cout<<"Unable to login."<<endl;
+    //     return 1;
+    // }
 
     // CLI ////////////////////////////////////////////////////////////////////////////////
 
