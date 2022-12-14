@@ -33,7 +33,7 @@ int main(){
         cout << "Unable to bind to port" << endl;
         return 1;
     }
-    cout << "Socket bound, waiting for client..." << endl;
+    cout << "Connecting..." << endl;
 
     // listen for client
     listen(socket_description, 3);
@@ -45,6 +45,8 @@ int main(){
         return 1;
     }
 
+    cout << "Connected" << endl;
+
     bool key[10] = {0,0,0,0,0,0,0,0,0,0};
 
     DiffieHellmanRSA dhrsa(new_socket);
@@ -53,34 +55,43 @@ int main(){
 
     cout << "Private Key: " << dhrsa.getPrivateKey() << endl;
 
-    cout << "Enter a message to send securely (< 100 chars): ";
-    string message;
-    getline(cin,message);
+    // cout << "Enter a message to send securely (< 100 chars): ";
+    // string message;
+    // getline(cin,message);
 
-    char messageAry[100] = {};
-    strcpy(messageAry, message.c_str());
-    bool encryptedBytes[100][8] = {{}};
+    string command = "";
     
-    // length + 1 for null terminator
-    for(int i = 0; i < message.length() + 1; i++){
-        bool charBits[8] = {0,0,0,0,0,0,0,0};
-        asciiToBinary(messageAry[i], charBits);
-        for(int j = 0; j < 8; j++){
-            encryptedBytes[i][j] = charBits[j];
+    do{
+        char messageAry[100] = {};
+        bool encryptedBytes[100][8] = {{}};
+        cout << "Remote $ ";
+        getline(cin, command);
+        strcpy(messageAry, command.c_str());
+
+        // length + 1 for null terminator
+        for(int i = 0; i < command.length() + 1; i++){
+            bool charBits[8] = {0,0,0,0,0,0,0,0};
+            asciiToBinary(messageAry[i], charBits);
+            for(int j = 0; j < 8; j++){
+                encryptedBytes[i][j] = charBits[j];
+            }
+
+            encrypt(charBits,key);
+
+            for(int j = 0; j < 8; j++){
+                encryptedBytes[i][j] = charBits[j];
+            }
         }
 
-        encrypt(charBits,key);
-
-        for(int j = 0; j < 8; j++){
-            encryptedBytes[i][j] = charBits[j];
+        if(send(new_socket , &encryptedBytes, sizeof(encryptedBytes), 0) < 0)
+        {
+            cout << "Unable to send server data to client";
+            return 1;
         }
     }
+    while(command != "quit");
 
-    if(send(new_socket , &encryptedBytes, sizeof(encryptedBytes), 0) < 0)
-	{
-		cout << "Unable to send server data to client";
-		return 1;
-	}
+    cout << "Closing connection...";
 
     close(socket_description);
 

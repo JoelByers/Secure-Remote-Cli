@@ -29,7 +29,7 @@ int main(){
 		return 1;
 	}
 
-    cout << "Connected to Server...\n";
+    cout << "Connected to Server\n";
 
     DiffieHellmanRSA dhrsa(socket_description);
     dhrsa.clientGetPrivateKey();
@@ -38,17 +38,25 @@ int main(){
 
     cout << "Private Key: " << dhrsa.getPrivateKey() << endl;
 
-    bool encryptedBytes[100][8] = {{}};
-    recv(socket_description, &encryptedBytes, sizeof(encryptedBytes), 0);
-
-    // Decrypt
     char message[100];
-    for(int i = 0; i < 100; i++){
-        decrypt(encryptedBytes[i], key);
-        message[i] = binaryToChar(encryptedBytes[i]);
-    }
 
-    cout << message;
+    do{
+        int received = 0;
+        bool encryptedBytes[100][8] = {{}};
+        recv(socket_description, &encryptedBytes, sizeof(encryptedBytes), 0);
+
+        // Decrypt
+        for(int i = 0; i < 100; i++){
+            decrypt(encryptedBytes[i], key);
+            message[i] = binaryToChar(encryptedBytes[i]);
+        }
+
+        cout << message << endl;
+    }
+    while(strcmp(message, "quit") != 0);
+
+    cout << "Closing Connection..." << endl;
+
     close(socket_description);
 
     return 0;

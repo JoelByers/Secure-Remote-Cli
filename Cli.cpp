@@ -130,6 +130,8 @@ bool Cli::call(string input){
     }
     else{
         if(hasPipe == true){
+            // Pipe code from here:
+            // https://stackoverflow.com/questions/52737554/redirect-stdout-back-to-console
             int oldStdout;
             oldStdout = dup(1);
             if(oldStdout == -1){
