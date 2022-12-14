@@ -28,7 +28,7 @@ int main(int argc, char** argv){
     struct sockaddr_in client;
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_port = htons(8421);
+    server.sin_port = htons(8431);
 
     // bind to port
     if(bind(socket_description,(struct sockaddr*) &server, sizeof(server)) < 0){
@@ -56,9 +56,6 @@ int main(int argc, char** argv){
     cout << "=============================================" << endl;
   
     // Cert //////////////////////////////////////////////////////////////////////////////
-
-    int numCerts = argc - 1;
-
     cout << "Certs:" << endl;
 
     CertGroup certGroup;
@@ -67,12 +64,12 @@ int main(int argc, char** argv){
     serverCert.printLess();
     cout << "----------------------------------------------------\n";
 
-    for(int i = 0; i < numCerts; i++){
-        Cert487 cert(argv[i + 1]);
-        cert.printLess();
-        cout << "----------------------------------------------------\n";
-        certGroup.addCert(cert);
-    }    
+    // for(int i = 0; i < numCerts; i++){
+    //     Cert487 cert(argv[i + 1]);
+    //     cert.printLess();
+    //     cout << "----------------------------------------------------\n";
+    //     certGroup.addCert(cert);
+    // }    
 
 
     // Send server cert to client
@@ -95,20 +92,53 @@ int main(int argc, char** argv){
         cout << "Unable to validate Chain" << endl;
         return 1;
     }
+    cout << "=============================================" << endl;
 
     // DH-RSA ////////////////////////////////////////////////////////////////////////////
     bool key[10] = {0,0,0,0,0,0,0,0,0,0};
-    DiffieHellmanRSA dhrsa(new_socket);
-    dhrsa.serverGetPrivateKey();
-    asciiToBinary((char)dhrsa.getPrivateKey(), key);
+    bool useDiffieHellman = true;
+    if(argc >= 2){
+        // Tell client to use key given
+        useDiffieHellman = false;
+        if(send(new_socket , &useDiffieHellman, sizeof(useDiffieHellman), 0) < 0)
+        {
+            cout << "Unable to send entryption type to client";
+            return 1;
+        }
 
-    cout << "Private Key: " << dhrsa.getPrivateKey() << endl;
+        RSA rsa;
+        int sharedKey = stoi(argv[1]);
+        int encryptedKey = rsa.encrypt(sharedKey, clientCert.getPublicKey());
+        if(send(new_socket , &encryptedKey, sizeof(encryptedKey), 0) < 0)
+        {
+            cout << "Unable to send shared key to client";
+            return 1;
+        }
+        asciiToBinary((char)sharedKey, key);
+        cout << "Private Key: " << sharedKey << endl;
+    }
+    else{
+        cout << "Using Signed Diffie-Hellman" << endl;
+
+        if(send(new_socket , &useDiffieHellman, sizeof(useDiffieHellman), 0) < 0)
+        {
+            cout << "Unable to send entryption type to client";
+            return 1;
+        }
+
+        DiffieHellmanRSA dhrsa(new_socket);
+        dhrsa.serverGetPrivateKey();
+        asciiToBinary((char)dhrsa.getPrivateKey(), key);
+
+        cout << "Private Key: " << dhrsa.getPrivateKey() << endl;
+    }
 
     // CLI ////////////////////////////////////////////////////////////////////////////////
 
     string command = "";
     
     do{
+        command = "";
         char messageAry[100] = {};
         bool encryptedBytes[100][8] = {{}};
         cout << "Remote $ ";
@@ -141,6 +171,6 @@ int main(int argc, char** argv){
     cout << "Closing connection..." << endl;
 
     close(socket_description);
-
+    close(new_socket);
     return 0;
 }

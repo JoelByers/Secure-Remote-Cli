@@ -142,6 +142,10 @@ void Cert487::writeLineToFile(ofstream &fileOut, string label, string data){
     fileOut << label << "=" << data << "\n";
 }
 
+int Cert487::getPublicKey(){
+    return data.publicKey;
+}
+
 void Cert487::writeToFile(string fileName){
     ofstream fileOut;
     fileOut.open(fileName);

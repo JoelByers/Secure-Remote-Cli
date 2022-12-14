@@ -2,6 +2,8 @@
 #include "fastmodexpon.h"
 #include <iostream>
 
+using namespace std;
+
 int gcd(int a, int b)
 {
     // Solution found here: geeksforgeeks.org/program-to-find-gcd-or-hcf-of-two-numbers/

@@ -42,6 +42,7 @@ class Cert487{
         string getIssuer();
         string getSubjectName();
         CertData getData();
+        int getPublicKey();
 };
 
 #endif
