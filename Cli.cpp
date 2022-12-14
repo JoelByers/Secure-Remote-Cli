@@ -109,7 +109,6 @@ bool Cli::commandIsAllowed(string command){
 bool Cli::call(string input){
     string pipeSplit[2];
     bool hasPipe = seperatePipe(input, pipeSplit);
-    cout << "AAAAAA" << endl;
     string command;
     if(hasPipe == true){
         input = pipeSplit[0];
@@ -118,7 +117,6 @@ bool Cli::call(string input){
     string* args;
     int numArgs = 0;    
     splitArgs(input, command, args, numArgs);
-    cout << "AAAAAA" << endl;
 
     if(commandIsAllowed(command) == false){
         cout << "You don't have permission to use command \""<< command << "\"" << endl;

@@ -18,16 +18,14 @@ void DiffieHellmanRSA::serverGetPrivateKey(){
     RSA rsa;
     int serverRsaE = rsa.getE();
 
-    cout << "Sending RSA keys to client...\n";
     if( send(socket , &serverRsaE, sizeof(serverRsaE), 0) < 0)
 	{
-		cout << "Unable to send server data to client";
+		cout << "Unable to send server RSA Keys to client";
 		return;
 	}
 
     int clientRsaE;
     recv(socket, &clientRsaE, sizeof(clientRsaE), 0) > 0;
-    cout << clientRsaE << endl;
 
     // Diffie-Hellman /////////////////////////////////////////////////////////////////////////////
 
@@ -50,7 +48,7 @@ void DiffieHellmanRSA::serverGetPrivateKey(){
 
     if( send(this->socket , &data, sizeof(data), 0) < 0)
 	{
-		cout << "Unable to send server data to client";
+		cout << "Unable to send Diffie-Hellman data to client";
 		return;
 	}
 
@@ -67,14 +65,12 @@ void DiffieHellmanRSA::clientGetPrivateKey(){
     int serverRSAKey;
     recv(socket, &serverRSAKey, sizeof(serverRSAKey), 0);
 
-    cout << "Received RSA Keys...\n";
-    cout << serverRSAKey << endl;
     RSA rsa;
     int ClientRsaE = rsa.getE();
 
     if(send(socket , &ClientRsaE, sizeof(ClientRsaE) , 0) < 0)
 	{
-		cout << "Unable to send client data to server" << endl;
+		cout << "Unable to send RSA Keys to server" << endl;
 		return;
 	}
 

@@ -65,6 +65,7 @@ int main(int argc, char** argv){
     Cert487 serverCert(Cert487("Server.txt"));
     certGroup.addCert(serverCert);
     serverCert.printLess();
+    cout << "----------------------------------------------------\n";
 
     for(int i = 0; i < numCerts; i++){
         Cert487 cert(argv[i + 1]);
@@ -73,7 +74,6 @@ int main(int argc, char** argv){
         certGroup.addCert(cert);
     }    
 
-    cout << "----------------------------------------------------\n";
 
     // Send server cert to client
     CertData serverCertData = serverCert.getData();
@@ -89,6 +89,12 @@ int main(int argc, char** argv){
     Cert487 clientCert(clientCertData);
     clientCert.printLess();
     certGroup.addCert(clientCert);
+
+    // Verify Client Cert
+    if(certGroup.validateChain(serverCert.getSerialNumber(),clientCert.getSerialNumber() , crl) == false){
+        cout << "Unable to validate Chain" << endl;
+        return 1;
+    }
 
     // DH-RSA ////////////////////////////////////////////////////////////////////////////
     bool key[10] = {0,0,0,0,0,0,0,0,0,0};

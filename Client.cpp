@@ -11,6 +11,7 @@
 #include "Cert487.h"
 #include "CertGroup.h"
 #include <string>
+#include "CRL.h"
 
 using namespace std;
 
@@ -35,6 +36,13 @@ int main(int argc, char** argv){
 
     cout << "Connected to Server\n";
 
+    // CRL /////////////////////////////////////////////////////////////////////////////////
+    CRL crl("crl.txt");
+    cout << "\nCRL:" << endl;
+    crl.print();
+    cout << "=============================================" << endl;
+  
+
     // Cert ///////////////////////////////////////////////////////////////////////////////
     cout << "Certs:" << endl;
     int numCerts = argc - 1;
@@ -43,14 +51,13 @@ int main(int argc, char** argv){
     Cert487 clientCert(Cert487("client.txt"));
     certGroup.addCert(clientCert);
     clientCert.printLess();
+    cout << "----------------------------------------------------\n";
     for(int i = 0; i < numCerts; i++){
         Cert487 cert(argv[i + 1]);
         cert.printLess();
         cout << "----------------------------------------------------\n";
         certGroup.addCert(cert);
     }    
-
-    cout << "----------------------------------------------------\n";
 
     // Get server cert
     CertData serverCertData;
@@ -60,13 +67,18 @@ int main(int argc, char** argv){
     certGroup.addCert(serverCert);
 
     // Send Client cert to server
-    // TODO: Bug Sending cert
     CertData clientCertData = clientCert.getData();
     if(send(socket_description , &clientCertData, sizeof(clientCertData), 0) < 0)
     {
         cout << "Unable to send server data to client";
         return 1;
     }    
+
+    // Verify Server Cert
+    if(certGroup.validateChain(clientCert.getSerialNumber(),serverCert.getSerialNumber() , crl) == false){
+        cout << "Unable to validate Chain" << endl;
+        return 1;
+    }
 
     // DH-RSA /////////////////////////////////////////////////////////////////////////////
     DiffieHellmanRSA dhrsa(socket_description);
@@ -92,9 +104,6 @@ int main(int argc, char** argv){
         }
 
         string command(message);
-        cout << "'" << command << "'"<< endl;
-        cout << command.length() << endl;
-
         cli.call(command);
     }
     while(strcmp(message, "quit") != 0);
